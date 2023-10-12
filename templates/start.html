@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Chat</title>
+        <link href="static/styles.css" rel="stylesheet" type="text/css">
+    </head>
+    <body id="start-body">
+        <div id="image-container"></div>
+        <h1 id="start-title">Chatzinho do Gustavinho</h1>
+        <div id="nickname-container" role="form" aria-labelledby="formTitle">
+            <input type="text" id="nickname" placeholder="Escolha um apelido" aria-label="Campo para escolher um apelido"/>
+            <button id="start-button" onclick="startChat()" aria-label="Iniciar chat">Iniciar Chat</button>
+        </div>
+        <script>
+            function startChat() {
+                var nickname = document.getElementById("nickname").value;
+                if (nickname) {
+                    window.location.href = `/chat?nickname=${nickname}`;
+                } else {
+                    alert("Por favor, escolha um apelido!");
+                }
+            }
+        </script>
+    </body>
+</html>

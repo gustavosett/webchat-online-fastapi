@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Chat</title>
+        <link href="static/styles.css" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+        <h1>Chatzinho 🤠</h1>
+        <h2>Bem-vindo(a) {{ name }}!</h2>
+        <div id="chat-container">
+            <ul id='messages'>
+            </ul>
+        </div>
+        <form id="chat-form" onsubmit="sendMessage(event)">
+            <input type="text" id="messageText" autocomplete="off"/>
+            <button type="submit">Enviar</button>
+        </form>
+        <script>
+            var beep = new Audio('static/beep.mp3');
+            var client_id = Date.now();
+            var ws = new WebSocket(`ws://192.168.1.6:8000/ws/${client_id}`);
+
+            function wrapEmojis(text) {
+                // Regex para identificar emojis
+                var emojiRegex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c\ude32-\ude3a]|[\ud83c\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/g;
+            
+                return text.replace(emojiRegex, '<span class="emoji">$&</span>');
+            }
+
+            function appendMessage(className, contentText) {
+                var messages = document.getElementById('messages');
+                var message = document.createElement('li');
+                message.className = className;
+            
+                // Alterado para usar innerHTML para permitir a renderização de HTML
+                message.innerHTML = wrapEmojis(contentText);
+                messages.appendChild(message);
+            }
+            
+            ws.onopen = function(event) {
+                var messageData = {
+                    nickname: "{{ name }}",
+                    message: ""
+                };
+
+                // Enviar uma mensagem ao servidor para indicar que a conexão foi estabelecida]
+                ws.send(JSON.stringify(messageData));
+            };
+
+            ws.onmessage = function(event) {
+                // Parseia a mensagem JSON
+                var data = JSON.parse(event.data);
+            
+                if (data.client_id != client_id) {
+                    // Tocar o som
+                    beep.play();
+                    appendMessage('received', `<b>${data.nickname}</b>: ${data.message}`);
+                }
+            };            
+            
+            function sendMessage(event) {
+                event.preventDefault();
+                var input = document.getElementById("messageText");
+                if (input.value != "") {
+                    var messageData = {
+                        nickname: "{{ name }}",
+                        message: input.value
+                    };
+                    ws.send(JSON.stringify(messageData));
+                    appendMessage('sent', `<b>Você</b>: ${input.value}`);
+                    input.value = '';
+                }
+            }
+        </script>
+    </body>
+</html>
