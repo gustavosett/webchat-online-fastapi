@@ -90,7 +90,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 except json.JSONDecodeError:
                     print(f"Failed to decode JSON: {data}")
                     await manager.send_personal_message("Erro: Mensagem não está no formato correto.", websocket)
-                    continue  # Skip to the next iteration
+                    continue  # Pula para próxima iteração
 
             message = data_dict.get("message", "")
             if message:
